@@ -6,14 +6,14 @@
 
 .slidezy-track {
     display: flex;
-    transition: transform ease 0.3s;
 }
-.slidezy-slide{
-    flex: 0 0 calc(100% / 3);
+
+.slidezy-slide {
+    flex: 0 0 auto;
 }
 
 .slidezy-prev,
-.slidezy-next{
+.slidezy-next {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
