@@ -10,6 +10,11 @@ function Slidezy(selector, options = {}) {
         speed:300,
         loop:false,
         nav: true,
+        controls: true,
+        controlsText: ["<", ">"],
+        prevButton: null,
+        nextButton: null,
+        slideBy: 1,
     }, options);
 
     this.slides = Array.from(this.container.children);
@@ -24,8 +29,11 @@ Slidezy.prototype._init = function () {
 
     this._createContent();
     this._createTrack();
-    this._createControls();
-    
+
+    if (this.opt.controls) {
+        this._createControls();
+    }
+
     if (this.opt.nav) {
         this._createNav();
     }
@@ -62,18 +70,28 @@ Slidezy.prototype._createTrack = function () {
 };
 
 Slidezy.prototype._createControls=function(){
-    this.prevBtn=document.createElement("button");
-    this.nextBtn=document.createElement("button");
+    this.prevBtn = this.opt.prevButton
+        ? document.querySelector(this.opt.prevButton)
+        : document.createElement("button");
+    this.nextBtn = this.opt.nextButton
+        ? document.querySelector(this.opt.nextButton)
+        : document.createElement("button");
 
-    this.prevBtn.textContent="<";
-    this.nextBtn.textContent=">";
+    if (!this.opt.prevButton) {
+        this.prevBtn.textContent = this.opt.controlsText[0];
+        this.prevBtn.className = "slidezy-prev";
+        this.content.appendChild(this.prevBtn);
+    }
 
-    this.prevBtn.className = "slidezy-prev";
-    this.nextBtn.className = "slidezy-next";
+    if (!this.opt.nextButton) {
+        this.nextBtn.textContent = this.opt.controlsText[1];
+        this.nextBtn.className = "slidezy-next";
+        this.content.appendChild(this.nextBtn);
+    }
 
-    this.container.append(this.prevBtn, this.nextBtn);
-    this.prevBtn.onclick = () => this.moveSlide(-1);
-    this.nextBtn.onclick = () => this.moveSlide(1);
+    const stepSize =this.opt.slideBy === "page" ? this.opt.items : this.opt.slideBy;
+    this.prevBtn.onclick = () => this.moveSlide(-stepSize);
+    this.nextBtn.onclick = () => this.moveSlide(stepSize);
 }
 
 Slidezy.prototype.moveSlide = function (step) {
