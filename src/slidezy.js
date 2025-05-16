@@ -66,7 +66,7 @@ Slidezy.prototype._createTrack = function () {
         this.track.appendChild(slide);
     });
 
-    this.container.appendChild(this.track);
+    this.content.appendChild(this.track);
 };
 
 Slidezy.prototype._createControls=function(){
@@ -89,43 +89,22 @@ Slidezy.prototype._createControls=function(){
         this.content.appendChild(this.nextBtn);
     }
 
-    const stepSize =this.opt.slideBy === "page" ? this.opt.items : this.opt.slideBy;
+    const stepSize =
+        this.opt.slideBy === "page" ? this.opt.items : this.opt.slideBy;
+
     this.prevBtn.onclick = () => this.moveSlide(-stepSize);
     this.nextBtn.onclick = () => this.moveSlide(stepSize);
 }
 
-Slidezy.prototype.moveSlide = function (step) {
-    if (this._isAnimating){
-        return;
-    } 
-    this._isAnimating=true;
-    const maxIndex=this.slides.length - this.opt.items;
-    this.currentIndex=Math.min(
-    Math.max(this.currentIndex+step,0),maxIndex);
-
-  setTimeout(() => {
-        if (this.opt.loop) {
-            if (this.currentIndex <= 0) {
-                this.currentIndex = maxIndex - this.opt.items;
-                this._updatePosition(true);
-            } else if (this.currentIndex >= maxIndex) {
-                this.currentIndex = this.opt.items;
-                this._updatePosition(true);
-            }
-            
-        }
-        this._isAnimating = false;
-    }, this.opt.speed);
-
-    this._updatePosition();
-
+Slidezy.prototype._getSlideCount = function () {
+    return this.slides.length - (this.opt.loop ? this.opt.items * 2 : 0);
 };
 
 Slidezy.prototype._createNav=function(){
     this.navWrapper=document.createElement("div");
     this.navWrapper.className="slidezy-nav";
 
-    const slideCount=this.slides.length-(this.opt.loop ? this.opt.items*2 : 0);
+    const slideCount=this._getSlideCount();
     const pageCount=Math.ceil(slideCount/this.opt.items);
 
 
@@ -150,6 +129,37 @@ Slidezy.prototype._createNav=function(){
     this.container.appendChild(this.navWrapper);
 
 }
+
+Slidezy.prototype.moveSlide = function (step) {
+    if (this._isAnimating) return;
+    this._isAnimating = true;
+
+    const maxIndex = this.slides.length - this.opt.items;
+
+    this.currentIndex = Math.min(
+        Math.max(this.currentIndex + step, 0),
+        maxIndex
+    );
+
+    setTimeout(() => {
+        if (this.opt.loop) {
+            const slideCount = this._getSlideCount();
+            if (this.currentIndex < this.opt.items) {
+                this.currentIndex += slideCount;
+                this._updatePosition(true);
+            } else if (this.currentIndex > slideCount) {
+                this.currentIndex -= slideCount;
+                this._updatePosition(true);
+            }
+        }
+        this._isAnimating = false;
+    }, this.opt.speed);
+
+    this._updatePosition();
+
+};
+
+
 
 Slidezy.prototype._updateNav=function(){
     let realIndex=this.currentIndex;
